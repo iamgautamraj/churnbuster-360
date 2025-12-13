@@ -12,11 +12,11 @@ The pipeline is managed by Apache Airflow and consists of 5 sequential, refactor
 
 | Stage | Tool/Operator | Function |
 | ----- | ------------- | -------- |
-| 1. Ingestion | PythonOperator | Generates synthetic customer and transaction data (customers.csv, transactions.csv).|
-| 2. Processing | BashOperator (PySpark) | Runs a PySpark job to calculate RFM (Recency, Frequency, Monetary) features: days_since_last_txn, total_txns, and avg_txn_amount. |
-| 3. Training | PythonOperator | Trains a Random Forest Classifier and saves the model with a unique, date-versioned filename (churn_model_YYYYMMDD_HHMMSS.pkl).|
-| 4. Inference | PythonOperator | Loads the latest model version, generates churn probability scores for all customers, and saves the predictions.|
-| 5. Action | BashOperator | Filters customers with P(Churn)>0.8 and simulates sending a retention email/discount, logging the action.|
+| Ingestion | PythonOperator | Generates synthetic customer and transaction data (customers.csv, transactions.csv).|
+| Processing | BashOperator (PySpark) | Runs a PySpark job to calculate RFM (Recency, Frequency, Monetary) features: days_since_last_txn, total_txns, and avg_txn_amount. |
+| Training | PythonOperator | Trains a Random Forest Classifier and saves the model with a unique, date-versioned filename (churn_model_YYYYMMDD_HHMMSS.pkl).|
+| Inference | PythonOperator | Loads the latest model version, generates churn probability scores for all customers, and saves the predictions.|
+| Action | BashOperator | Filters customers with P(Churn)>0.8 and simulates sending a retention email/discount, logging the action.|
 
 ## 3. ✨ Key Technical Highlights
 - Deployment Readiness: Successfully refactored core application logic (generate_data, train_model, predict_churn) from brittle BashOperator commands into the portable and safer PythonOperator.
@@ -58,12 +58,12 @@ This project assumes you are running in a Linux-based environment (like a VS Cod
 
 1. Clone the repository:
 
-    git clone <your_repo_url>
-    cd ChurnBuster-360
+        git clone <your_repo_url>
+        cd ChurnBuster-360
 
 2. Start the Airflow Stack (This will pull the image and create the containers):
 
-    docker compose up -d
+        docker compose up -d
 
 ### B. Execute the Pipeline
 
@@ -77,10 +77,10 @@ This project assumes you are running in a Linux-based environment (like a VS Cod
 
 1. Install Streamlit and dependencies on your host machine/Codespace terminal:
 
-    pip install streamlit pandas matplotlib seaborn
+        pip install streamlit pandas matplotlib seaborn
 
 2. Run the application:
 
-    streamlit run src/dashboard/app.py
+        streamlit run src/dashboard/app.py
 
 3. Access the Streamlit URL (e.g., http://localhost:8501) to view the real-time predictions and campaign logs.
