@@ -1,0 +1,32 @@
+{
+  "name": "ChurnBuster Dev Environment",
+  "image": "mcr.microsoft.com/devcontainers/python:1-3.11-bullseye",
+  "features": {
+    /* Install Docker (Docker-in-Docker) so we can run Airflow containers */
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    },
+    /* Install Terraform */
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "latest",
+      "tflint": "latest"
+    },
+    /* Install Google Cloud SDK */
+    "ghcr.io/devcontainers/features/gcloud-cli:1": {
+      "version": "latest"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "ms-python.python",
+        "googlecloudtools.cloudcode",
+        "mechatroner.rainbow-csv"
+      ]
+    }
+  },
+  "postCreateCommand": "echo 'Environment Ready!'"
+}
