@@ -16,14 +16,14 @@ The pipeline is managed by Apache Airflow and consists of 5 sequential, refactor
 | Processing | BashOperator (PySpark) | Runs a PySpark job to calculate RFM (Recency, Frequency, Monetary) features: days_since_last_txn, total_txns, and avg_txn_amount. |
 | Training | PythonOperator | Trains a Random Forest Classifier and saves the model with a unique, date-versioned filename (churn_model_YYYYMMDD_HHMMSS.pkl).|
 | Inference | PythonOperator | Loads the latest model version, generates churn probability scores for all customers, and saves the predictions.|
-| Action | BashOperator | Filters customers with P(Churn)>0.8 and simulates sending a retention email/discount, logging the action.|
+| Action | BashOperator (`send_alerts.py`) | Filters customers with P(Churn)>0.8 and simulates sending a retention email/discount (COMEBACK20 coupon), logging every action to `email_campaign_log.csv`.|
 
 ## 3. ✨ Key Technical Highlights
 - Deployment Readiness: Successfully refactored core application logic (generate_data, train_model, predict_churn) from brittle BashOperator commands into the portable and safer PythonOperator.
 
 - Model Versioning: Implemented a robust versioning system where models are saved with a timestamp, ensuring the prediction task always loads the correct and latest artifact.
 
-- Containerization: The entire MLOps environment (Airflow Scheduler/Worker/Webserver, PostgreSQL) is orchestrated using Docker Compose for local deployment fidelity.
+- Containerization: The entire MLOps environment (Airflow Scheduler, Webserver, and Init services) is orchestrated using Docker Compose for local deployment fidelity. The backend database is SQLite (mounted as `airflow.db`), suitable for local/single-node execution.
 
 - Data Processing at Scale: Utilized PySpark in the processing stage to handle large-scale feature engineering (RFM calculations).
 
@@ -75,12 +75,26 @@ This project assumes you are running in a Linux-based environment (like a VS Cod
 
 ### C. Launch the Dashboard
 
-1. Install Streamlit and dependencies on your host machine/Codespace terminal:
+1. Install dependencies on your host machine/Codespace terminal:
 
-        pip install streamlit pandas matplotlib seaborn
+        pip install -r requirements.txt
 
 2. Run the application:
 
         streamlit run src/dashboard/app.py
 
 3. Access the Streamlit URL (e.g., http://localhost:8501) to view the real-time predictions and campaign logs.
+
+> **Note**: Run `streamlit run src/dashboard/app.py` from the **project root directory** to ensure relative data paths resolve correctly.
+
+---
+
+## 6. ⚠️ Known Limitations (Prototype)
+
+This project is a portfolio prototype. The following are known simplifications relative to a production system:
+
+- **Target Leakage**: The churn label in `train_model.py` is derived from `days_since_last_txn` (a training feature), which inflates model accuracy. In production, the `is_churn` label from the source data — or a ground-truth label from CRM records — would be used instead.
+- **SQLite Backend**: Docker Compose uses SQLite for Airflow's metadata DB. Multi-container SQLite access can cause sync issues; production deployments should use PostgreSQL.
+- **No Cloud Storage**: All pipeline artifacts are written to local Docker volumes. The `infra/` Terraform configs (now removed) were scaffolded for a future GCS/BigQuery integration.
+- **Simulated Email Sending**: `send_alerts.py` logs emails to CSV instead of calling a real email API (e.g., SendGrid, AWS SES).
+- **Runtime Dependency Install**: `train_model_python()` in the DAG installs packages at runtime via `pip`. This should be moved to the Docker image build step for production use.

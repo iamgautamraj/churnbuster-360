@@ -55,16 +55,7 @@ def train_model():
     print("📝 Classification Report:")
     print(classification_report(y_test, predictions))
 
-# ... (after evaluation and before saving the model)
-
-    # 5. Evaluate
-    predictions = model.predict(X_test)
-    accuracy = accuracy_score(y_test, predictions)
-    print(f"📊 Model Accuracy: {accuracy:.2f}")
-    print("📝 Classification Report:")
-    print(classification_report(y_test, predictions))
-
-    # --- NEW: SAVE FEATURE IMPORTANCE ---
+# --- NEW: SAVE FEATURE IMPORTANCE ---
     print("💾 Saving Feature Importances...")
     importances = pd.DataFrame({
         'feature': features,
